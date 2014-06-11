@@ -19,19 +19,19 @@ var NUM_BLOCKS_SHOWN = 3,
 
 
 var FONT_STYLE = { // inactive
-	font : 'Munro',
+	font : '24px Courier New',
 	fill : '#555555'
 };
 var FONT_STYLE2 = { // active (cur_char)
-	font : 'Munro',
+	font : '24px Courier New',
 	fill : '#FFFFFF'
 };
 var FONT_STYLE3 = { // done
-	font : 'Munro',
+	font : '24px Courier New',
 	fill : '#00FF00'
 };
 var FONT_STYLE4 = { // error
-	font : 'Munro',
+	font : '24px Courier New',
 	fill : '#FF0000'
 };
 

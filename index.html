@@ -6,18 +6,33 @@
   <title>Lyric Boss</title>
 
   <style>
+    @font-face {
+      font-family: 'Munro';
+      /*src: url('munro-webfont.ttf');*/
+      src: url('Munro.ttf') format('truetype');
+      /*src: url('munro-webfont.eot?#iefix') format('embedded-opentype'),
+           url('munro-webfont.woff') format('woff'),
+           url('munro-webfont.ttf') ,
+           url('munro-webfont.svg#webfontregular') format('svg');*/
+      font-weight: normal;
+      font-style: normal;
+
+    }
     #game_div {
       margin: auto;
       margin-top: 50px;
     }
+    h1, h2, h3 { 
+      font-family: 'Munro', serif; 
+    }
   </style>
 
-  <script type="text/javascript" src="phaser.min.js"></script>
-  <script type="text/javascript" src="main.js"></script> 
+  <script type="text/javascript" src="js/phaser.min.js"></script>
+  <script type="text/javascript" src="js/main.js"></script> 
 </head>
 
 <body>
-
+  <h1>Lyric Boss</h1>
   <div id="game_div"> </div>
 
 </body>
