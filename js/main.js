@@ -1,6 +1,7 @@
 var game = new Phaser.Game(900, 600, Phaser.CANVAS, "game_div");
 
-var lines = [];
+var lines = [],
+	markers = [];
 var song;
 
 var blocks = [],
@@ -45,6 +46,19 @@ var bottom_text,
 
 var font_style_set = false;
 
+// function decideRepeat() {
+	
+// 	if(!song.isPlaying) {
+// 		song.stop();
+// 	} else {
+// 		song.restart('0');
+// 	}
+
+// 	console.log('booyah');
+// 	//song.onMarkerComplete.add(decideRepeat, song.context);
+// }
+
+
 var main_state = {
 	preload : function() {
 		//game.load.bitmapFont('Munro-bitmap', '../fonts/Munro.png', '../fonts/Munro.fnt');
@@ -60,8 +74,17 @@ var main_state = {
 
  	    for(var i=0;i < text.length;i++) {
  	    	lines.push(text[i].substring(10).replace(/ $/, ''));
- 	    	
+ 	    	markers.push(parseTime(text[i]));
+
+ 	    	// var start = parseTime(text[i]);
+ 	    	// var end = i + 1 < text.length ? parseTime(text[i + 1]) : song.duration;
+ 	    	// console.log(start + ', ' + end);
+ 	    	// song.addMarker((i).toString(), start, end - start); 
+
  	    }
+
+ 	    //song.onMarkerComplete.add(decideRepeat, song.context);
+
 
 		bottom_text = game.add.group()
 		text_highight = game.add.group()
@@ -97,19 +120,41 @@ var main_state = {
 		highlight.drawRect(0, 0, FONT_WIDTH, FONT_HEIGHT);
 
 		game.input.keyboard.addCallbacks(game.context, process_keydown, null);
-		// song.play();
+		
 	},
 
 	update : function() {
+		if((song.currentTime / 1000) > markers[cur_line + 1]) {
+			song.stop();
+			song.play('', markers[cur_line + 1]);
+			console.log(song.currentTime / 1000);
+			
+		}
+
+		//console.log(done.text.length + ' ' + blocks[0].text.length);
+
 
 	},
 
 	render : function() {
 		game.debug.soundInfo(song, 10, 200);
+
 	}
 
 
 }
+
+
+
+
+
+
+
+
+function parseTime(st) {
+	return parseFloat(st.substr(1,2)) * 60 + parseFloat(st.substr(4,5));
+}
+
 
 function pop_blocks() {
 	// pass down text
@@ -121,7 +166,9 @@ function pop_blocks() {
 			blocks[i].setText('');
 		}
 	}
+	line_fininshed = false
 	reset_cur();
+	update_highlights();
 }
 
 function reset_cur() {
@@ -133,13 +180,11 @@ function reset_cur() {
 }
 
 function process_keydown(event) {
-	console.log(event.keyCode );
+	
 	// ENTER and the line is done
-	if(done.text.length == blocks[0].text.length) {
-		if(event.keyCode == 13) {
-			pop_blocks();
-			update_highlights();
-		}
+	if(blocks[0].text.length == 1 || done.text.length == blocks[0].text.length - 1) {
+		line_fininshed = true;
+		// if(event.keyCode == 13) pop_blocks();
 	// correct letter
 	} else if(event.keyCode == cur_char.text.toUpperCase().charCodeAt(0) ||
 		(event.keyCode == 222 && cur_char.text == "'")
