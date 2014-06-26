@@ -1,9 +1,4 @@
 var main_state = {
-	preload : function() {
-		game.load.audio('song', ['../audio/cantholdus.mp3']);
-		game.load.text('lyrics', '../audio/cantholdus.lrc');
-	},
-
 	create : function() {
 		song = game.add.audio('song');
 		var html = game.cache.getText('lyrics');
@@ -32,12 +27,15 @@ var main_state = {
 		for(var i=0;i < NUM_BLOCKS_SHOWN;i++) {
 			var newline = game.add.text(STARTX, STARTY + (FONT_HEIGHT + 8) * i,
 										lines[i], FONT_STYLE);
+
 			blocks.push(newline);
 			bottom_text.add(newline);
 		}
 
 
+
 		done = game.add.text(STARTX, STARTY, '', FONT_STYLE3);
+		done.setShadow(0, 3, COLORS[2], 0);
 		cur_char = game.add.text(STARTX, STARTY, '', FONT_STYLE2)
 		top_text.add(done);
 		top_text.add(cur_char);
@@ -53,9 +51,13 @@ var main_state = {
 		error.beginFill(0xFF0000, 1);
 		error.drawRect(0, 0, FONT_WIDTH, FONT_HEIGHT);
 		
-		highlight.lineStyle(1, 0x00FF00, 1);
-		highlight.beginFill(0x00FF00, 1);
+		highlight.lineStyle(1, 0x3DC796, 1);
+		highlight.beginFill(0x3DC796, 1);
 		highlight.drawRect(0, 0, FONT_WIDTH, FONT_HEIGHT);
+
+		score = 0;
+		
+		score_text = game.add.text(720, 50, "MISSES: 0", FONT_STYLE2);
 
 		game.input.keyboard.addCallbacks(game.context, process_keydown, null);
 		
@@ -74,6 +76,9 @@ var main_state = {
 				song.stop();
 				song.play('', markers[cur_line]);
 				time_offset = markers[cur_line];
+
+				score++;
+				score_text.setText("MISSES: " + score);
 			}
 
 		}
@@ -173,11 +178,13 @@ function process_keydown(event) {
 	if(cur_char.text == '<') {
 		text_highight.visible = false;
 		error_highlight.visible = true;
-		blocks[0].setStyle(FONT_STYLE4);
+		blocks[0].setStyle(FONT_STYLE4)
+		blocks[0].setShadow(0, 3, COLORS[4], 0);
 	} else {
 		text_highight.visible = true;
 		error_highlight.visible = false;
 		blocks[0].setStyle(FONT_STYLE2);
+		blocks[0].setShadow(0, 3, COLORS[2], 0);
 	}
 
 	if (event.keyCode == 8 || event.keyCode == 32) {

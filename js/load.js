@@ -1,5 +1,7 @@
 var game = new Phaser.Game(900, 600, Phaser.CANVAS, "game_div");
 
+var COLORS = ['#FD2684', '#B907A5', '#3DC796', '#9FFE74', '#FF6361', '#222222', '#555555'];
+
 var lines = [],
 	markers = [],
 	time_offset = 0;
@@ -16,6 +18,8 @@ var cur_char,
 
 var error,
 	highlight;
+
+var score, score_text;
 
 // GROUPS 
 var bottom_text,
@@ -34,7 +38,7 @@ var NUM_BLOCKS_SHOWN = 15,
 var FONT = '18px "Telegrama"';
 var FONT_STYLE = { // inactive
 	font : FONT,
-	fill : '#555555'
+	fill : COLORS[6]
 };
 var FONT_STYLE2 = { // active (cur_char)
 	font : FONT,
@@ -42,14 +46,13 @@ var FONT_STYLE2 = { // active (cur_char)
 };
 var FONT_STYLE3 = { // done
 	font : FONT,
-	fill : '#00FF00'
+	fill : COLORS[2]
 };
 var FONT_STYLE4 = { // error
 	font : FONT,
-	fill : '#FF0000'
+	fill : COLORS[4]
 };
 
-var COLORS = ['#FD2684', '#B907A5', '#3DC796', '#C3FE4A', '#FF764C', '#222222'];
 
 // LOADING STUFF
 var BIG_FONT = '100px "Telegrama"';
@@ -109,14 +112,14 @@ var load_state = {
 		load_textb = game.add.text(100, 108, "LOADING", LOADING_XSTYLES[1]);
 		load_textr = game.add.text(100, 108, "LOADING", LOADING_XSTYLES[0]);
 		load_text = game.add.text(100, 100, "LOADING", LOADING_STYLE);
-		game.time.events.loop(Phaser.Timer.SECOND * 0.4, this.change_color, this);
+		game.time.events.loop(Phaser.Timer.SECOND * 0.2, this.change_color, this);
 		
 		
 		song_group = game.add.group();
 		song_sel_hl = game.add.text(150, 0, song_titles[i], FONT_STYLEX);
 		song_group.add(song_sel_hl);
 		song_enter = game.add.text(500, 0, "[ PRESS ENTER ]", FONT_STYLE2)
-		song_enter.setShadow(0, 3, COLORS[2], 0);
+		song_enter.setShadow(0, 3, COLORS[4], 0);
 		song_group.add(song_enter);
 
 		for(var i=0;i < song_titles.length;i++) {
