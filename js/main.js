@@ -1,70 +1,7 @@
-var game = new Phaser.Game(900, 600, Phaser.CANVAS, "game_div");
-
-var lines = [],
-	markers = [];
-var song;
-
-var blocks = [],
-	done,
-	cur_char;
-
-var cur_index = 0,
-	cur_line = 0;
-
-var error,
-	highlight;
-
-var NUM_BLOCKS_SHOWN = 3,
-    FONT_WIDTH = 16,
-    FONT_HEIGHT = 28,
-    STARTX = 10,
-    STARTY = 10;
-
-var FONT = '24px "Telegrama"';
-var FONT_STYLE = { // inactive
-	font : FONT,
-	fill : '#555555'
-};
-var FONT_STYLE2 = { // active (cur_char)
-	font : FONT,
-	fill : '#FFFFFF'
-};
-var FONT_STYLE3 = { // done
-	font : FONT,
-	fill : '#00FF00'
-};
-var FONT_STYLE4 = { // error
-	font : FONT,
-	fill : '#FF0000'
-};
-
-// groups
-var bottom_text,
-	text_highight,
-	error_highlight,
-	top_text;
-
-var font_style_set = false;
-
-// function decideRepeat() {
-	
-// 	if(!song.isPlaying) {
-// 		song.stop();
-// 	} else {
-// 		song.restart('0');
-// 	}
-
-// 	console.log('booyah');
-// 	//song.onMarkerComplete.add(decideRepeat, song.context);
-// }
-
-
 var main_state = {
 	preload : function() {
-		//game.load.bitmapFont('Munro-bitmap', '../fonts/Munro.png', '../fonts/Munro.fnt');
-		game.load.audio('song', ['../audio/cant_hold_us.mp3']);
-		game.load.text('lyrics', '../audio/cant_hold_us.lrc');
-
+		game.load.audio('song', ['../audio/cantholdus.mp3']);
+		game.load.text('lyrics', '../audio/cantholdus.lrc');
 	},
 
 	create : function() {
@@ -73,7 +10,8 @@ var main_state = {
  	    var text = html.split('\n');
 
  	    for(var i=0;i < text.length;i++) {
- 	    	lines.push(text[i].substring(10).replace(/ $/, ''));
+ 	    	lines.push(text[i].substring(10).replace(/ $/, '')
+ 	    									.replace(/\n/, ''));
  	    	markers.push(parseTime(text[i]));
 
  	    	// var start = parseTime(text[i]);
@@ -92,7 +30,7 @@ var main_state = {
 		top_text = game.add.group()
 
 		for(var i=0;i < NUM_BLOCKS_SHOWN;i++) {
-			var newline = game.add.text(STARTX, STARTY + FONT_HEIGHT * i,
+			var newline = game.add.text(STARTX, STARTY + (FONT_HEIGHT + 8) * i,
 										lines[i], FONT_STYLE);
 			blocks.push(newline);
 			bottom_text.add(newline);
@@ -124,29 +62,29 @@ var main_state = {
 	},
 
 	update : function() {
-		if((song.currentTime / 1000) > markers[cur_line + 1]) {
-			song.stop();
-			song.play('', markers[cur_line + 1]);
-			console.log(song.currentTime / 1000);
+		// console.log(time_offset + song.currentTime / 1000);
+		// console.log((song.currentTime / 1000) + '\t' + (markers[cur_line + 1]));
+
+		if((time_offset + song.currentTime / 1000) > markers[cur_line + 1]) {
+			//console.log('m');
 			
+			if(line_finished) {
+				pop_blocks();
+			} else {	
+				song.stop();
+				song.play('', markers[cur_line]);
+				time_offset = markers[cur_line];
+			}
+
 		}
 
-		//console.log(done.text.length + ' ' + blocks[0].text.length);
-
-
+		if(song.isDecoded && !song.isPlaying) song.play();
 	},
 
 	render : function() {
-		game.debug.soundInfo(song, 10, 200);
-
+		// game.debug.soundInfo(song, 10, 200);
 	}
-
-
 }
-
-
-
-
 
 
 
@@ -166,7 +104,7 @@ function pop_blocks() {
 			blocks[i].setText('');
 		}
 	}
-	line_fininshed = false
+	line_finished = false;
 	reset_cur();
 	update_highlights();
 }
@@ -179,50 +117,57 @@ function reset_cur() {
 	done.text = '';
 }
 
+function line_completed() {
+	return blocks[0].text.length < 2 || done.text.length == blocks[0].text.length - 1;
+}
+
 function process_keydown(event) {
-	
+	// console.log(event);
 	// ENTER and the line is done
-	if(blocks[0].text.length == 1 || done.text.length == blocks[0].text.length - 1) {
-		line_fininshed = true;
-		// if(event.keyCode == 13) pop_blocks();
-	// correct letter
-	} else if(event.keyCode == cur_char.text.toUpperCase().charCodeAt(0) ||
-		(event.keyCode == 222 && cur_char.text == "'")
-		) {
-		cur_index++;
-		cur_char.x += FONT_WIDTH;
-		update_text();
-	// BACK
-	} else if(event.keyCode == 8) {
-		if(cur_index > 0) {
-			cur_index--;
-			cur_char.x -= FONT_WIDTH;
-			
-			if(cur_char.text == '<') {
-				// if you're back to the right letter
-				if(cur_index == done.text.length) {
-					update_text();
-				// else keep it like that
+	if(!line_completed()) {
+		// correct letter
+		if(event.keyCode == cur_char.text.toUpperCase().charCodeAt(0) ||
+			(event.keyCode == 222 && cur_char.text == "'") ||
+			(event.keyCode == 188 && cur_char.text == ",")
+			) {
+			cur_index++;
+			cur_char.x += FONT_WIDTH;
+			update_text();
+		// BACK
+		} else if(event.keyCode == 8) {
+			if(cur_index > 0) {
+				cur_index--;
+				cur_char.x -= FONT_WIDTH;
+				
+				if(cur_char.text == '<') {
+					// if you're back to the right letter
+					if(cur_index == done.text.length) {
+						update_text();
+					// else keep it like that
+					} else {
+						error.x = cur_char.x;
+						error.y = cur_char.y;
+					}
 				} else {
-					error.x = cur_char.x;
-					error.y = cur_char.y;
+					update_text();
 				}
-			} else {
-				update_text();
 			}
+		// not f1 - f12 keys and an alphanumeric WRONG
+		} else if(/[A-Za-z0-9' ]/.test(String.fromCharCode(event.keyCode))) {
+			// console.log('WRONG');
+			cur_index++;
+			cur_char.x += FONT_WIDTH;
+			cur_char.setText('<');
+
+			update_highlights();
 		}
-	// not f1 - f12 keys and an alphanumeric WRONG
-	} else if(/[A-Za-z0-9' ]/.test(String.fromCharCode(event.keyCode))) {
-		// console.log('WRONG');
-		cur_index++;
-		cur_char.x += FONT_WIDTH;
-		cur_char.setText('<');
-
-		update_highlights();
+	} 
+	// CHECK AGAIN
+	//console.log(done.text.length + ' ' + (blocks[0].text.length - 1));
+	if(line_completed()) {
+		line_finished = true;
+		//console.log('fin');
 	}
-
-
-	//console.log(!(/[^A-Za-z0-9 ]/.test(String.fromCharCode(event.keyCode))));
 
 	// error or not
 	if(cur_char.text == '<') {
@@ -253,6 +198,8 @@ function update_highlights() {
 	error.y = cur_char.y;
 }
 
+
+game.state.add('load', load_state);  
 game.state.add('main', main_state);
-game.state.start('main');
+game.state.start('load');
 
