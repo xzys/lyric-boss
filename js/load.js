@@ -1,6 +1,9 @@
 var game = new Phaser.Game(900, 600, Phaser.CANVAS, "game_div");
 
 var COLORS = ['#FD2684', '#B907A5', '#3DC796', '#9FFE74', '#FF6361', '#222222', '#555555'];
+var GD_URL = 'https://googledrive.com/host/0B0sSFUeQGjaGRGJTdzlUcFZWQ0E/';
+
+var song_titles = ["1. Can't Hold Us -- Macklemore & Ryan Lewis"];
 
 var lines = [],
 	markers = [],
@@ -91,18 +94,21 @@ var load_text, load_textr, load_textb;
 var load_count = 0;
 
 // var song_titles = ["1. Can't Hold Us -- Macklemore & Ryan Lewis"];
-var song_titles = ["1. Can't Hold Us -- Macklemore & Ryan Lewis"];
+
+
 var song_group, song_sel_hl, song_list = [];
-var song_enter;
 var	song_selected = 0;
+var song_enter;
 
 var loaded = false;
+var game_finished = false;
+var esc_key;
 
 var load_state = {
 	preload : function() {
 		//game.load.bitmapFont('Munro-bitmap', '../fonts/Munro.png', '../fonts/Munro.fnt');
-		game.load.audio('song', ['../audio/cantholdus.mp3']);
-		game.load.text('lyrics', '../audio/cantholdus.lrc');
+		game.load.audio('song', [GD_URL + 'cantholdus.mp3']);
+		game.load.text('lyrics', GD_URL + 'cantholdus.lrc');
 	},
 
 	create : function() {
@@ -118,9 +124,10 @@ var load_state = {
 		song_group = game.add.group();
 		song_sel_hl = game.add.text(150, 0, song_titles[i], FONT_STYLEX);
 		song_group.add(song_sel_hl);
-		song_enter = game.add.text(500, 0, "[ PRESS ENTER ]", FONT_STYLE2)
+		song_enter = game.add.text(620, 0, "[ PRESS ENTER ]", FONT_STYLE2)
 		song_enter.setShadow(0, 3, COLORS[4], 0);
 		song_group.add(song_enter);
+
 
 		for(var i=0;i < song_titles.length;i++) {
 			var s = game.add.text(150, 0, song_titles[i], FONT_STYLE2);
@@ -133,7 +140,6 @@ var load_state = {
 		load_text.x = game.width/2 - load_text.width/2;
 		load_text.y = game.height/2 - load_text.height/2;
 		this.set_text();
-		
 	},
 
 	update : function() {
@@ -189,6 +195,61 @@ var load_state = {
 			load_textb.setText(text);
 			load_text.setText(text);
 		}
+	},
+
+	start : function() {
+		game.state.start('main');
+	}
+}
+
+
+var next_state = {
+	craete : function() {
+		load_textb = game.add.text(100, 108, "LYRIC BOSS", LOADING_XSTYLES[1]);
+		load_textr = game.add.text(100, 108, "LYRIC BOSS", LOADING_XSTYLES[0]);
+		load_text = game.add.text(100, 100, "LYRIC BOSS", LOADING_STYLE);
+		game.time.events.loop(Phaser.Timer.SECOND * 0.2, this.change_color, this);
+		
+		
+		song_group = game.add.group();
+		song_sel_hl = game.add.text(150, 0, song_titles[i], FONT_STYLEX);
+		song_group.add(song_sel_hl);
+		song_enter = game.add.text(620, 0, "[ PRESS ENTER ]", FONT_STYLE2)
+		song_enter.setShadow(0, 3, COLORS[4], 0);
+		song_group.add(song_enter);
+
+
+		for(var i=0;i < song_titles.length;i++) {
+			var s = game.add.text(150, 0, song_titles[i], FONT_STYLE2);
+			song_list.push(s);
+			song_group.add(s);
+		}
+
+		load_text.x = game.width/2 - load_text.width/2;
+		this.set_text();
+		song_group.visible = true;
+	},
+
+	update : function() {
+		var diff = load_text.y - TITLE_TARGET_Y;
+		if(diff > 1) load_text.y -= diff * 0.1;
+		this.set_text();
+	},
+
+	set_text : function() {
+		load_textr.x = load_text.x;
+		load_textr.y = load_text.y + 6;
+		load_textb.x = load_text.x;
+		load_textb.y = load_text.y + 10;
+
+		for(var i=0;i < song_list.length;i++) {
+			song_list[i].y = load_text.y + 120 + i * 80;
+		}
+		
+		song_sel_hl.setText(song_list[song_selected].text);
+		song_sel_hl.x = song_list[song_selected].x;
+		song_sel_hl.y = song_list[song_selected].y + 3;
+		song_enter.y = song_list[song_selected].y + 200;
 	},
 
 	start : function() {
